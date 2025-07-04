@@ -1,6 +1,6 @@
 name: flutter_audio_output
 description: A Flutter package flutter_audio_output is to adapt music output.
-version: 0.0.3
+version: 0.0.4
 homepage: https://github.com/itsmurphy/flutter_audio_output.git
 
 environment:
