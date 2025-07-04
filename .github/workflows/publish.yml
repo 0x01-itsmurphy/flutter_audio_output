@@ -1,0 +1,257 @@
+name: Publish to pub.dev
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to publish (e.g., 1.2.3)'
+        required: true
+        type: string
+      dry_run:
+        description: 'Perform a dry run (test without publishing)'
+        required: false
+        type: boolean
+        default: true
+
+env:
+  FLUTTER_VERSION: '3.19.0'
+
+jobs:
+  # Pre-publish validation
+  validate-for-publish:
+    name: 🔍 Pre-publish Validation
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      should-publish: ${{ steps.version.outputs.should-publish }}
+    
+    steps:
+      - name: 📚 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 🐦 Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: 'stable'
+          cache: true
+
+      - name: 📦 Install dependencies
+        run: flutter pub get
+
+      - name: 🔍 Validate package structure
+        run: |
+          echo "Validating package structure..."
+          flutter pub publish --dry-run
+
+      - name: 📊 Check package score
+        run: |
+          dart pub global activate pana
+          pana --no-warning --exit-code-threshold 0
+
+      - name: 🏷️ Extract and validate version
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" == "release" ]; then
+            VERSION="${{ github.event.release.tag_name }}"
+            VERSION="${VERSION#v}"  # Remove 'v' prefix if present
+            DRY_RUN=false
+          else
+            VERSION="${{ github.event.inputs.version }}"
+            DRY_RUN="${{ github.event.inputs.dry_run }}"
+          fi
+          
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "should-publish=$([[ "$DRY_RUN" == "false" ]] && echo "true" || echo "false")" >> $GITHUB_OUTPUT
+          
+          echo "📋 Version to publish: $VERSION"
+          echo "🚀 Will publish: $([[ "$DRY_RUN" == "false" ]] && echo "YES" || echo "NO (dry run)")"
+
+      - name: 🔍 Check if version exists on pub.dev
+        id: check-version
+        run: |
+          PACKAGE_NAME=$(grep "name:" pubspec.yaml | cut -d' ' -f2)
+          VERSION="${{ steps.version.outputs.version }}"
+          
+          echo "Checking if version $VERSION exists for package $PACKAGE_NAME..."
+          
+          # Check if version exists on pub.dev
+          if curl -s "https://pub.dev/api/packages/$PACKAGE_NAME/versions/$VERSION" | grep -q "version"; then
+            echo "❌ Version $VERSION already exists on pub.dev"
+            exit 1
+          else
+            echo "✅ Version $VERSION is available for publishing"
+          fi
+
+      - name: 🔍 Validate pubspec.yaml version
+        run: |
+          PUBSPEC_VERSION=$(grep "version:" pubspec.yaml | cut -d' ' -f2)
+          INPUT_VERSION="${{ steps.version.outputs.version }}"
+          
+          echo "📋 pubspec.yaml version: $PUBSPEC_VERSION"
+          echo "📋 Input version: $INPUT_VERSION"
+          
+          if [ "$PUBSPEC_VERSION" != "$INPUT_VERSION" ]; then
+            echo "❌ Version mismatch between pubspec.yaml ($PUBSPEC_VERSION) and input ($INPUT_VERSION)"
+            echo "Please update pubspec.yaml to match the release version"
+            exit 1
+          else
+            echo "✅ Version numbers match"
+          fi
+
+  # Run full test suite before publishing
+  test-before-publish:
+    name: 🧪 Full Test Suite
+    needs: validate-for-publish
+    uses: ./.github/workflows/ci.yml
+
+  # Publish to pub.dev
+  publish:
+    name: 🚀 Publish to pub.dev
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: [validate-for-publish, test-before-publish]
+    environment: production
+    
+    steps:
+      - name: 📚 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 🐦 Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: 'stable'
+          cache: true
+
+      - name: 📦 Install dependencies
+        run: flutter pub get
+
+      - name: 🔐 Setup pub.dev credentials
+        run: |
+          mkdir -p ~/.pub-cache
+          echo '${{ secrets.PUB_DEV_CREDENTIALS }}' > ~/.pub-cache/credentials.json
+
+      - name: 🚀 Publish to pub.dev (dry run)
+        if: needs.validate-for-publish.outputs.should-publish == 'false'
+        run: |
+          echo "🔍 Performing dry run publish..."
+          flutter pub publish --dry-run
+          echo "✅ Dry run completed successfully!"
+          echo "🎉 Package is ready for publishing to pub.dev"
+
+      - name: 🚀 Publish to pub.dev
+        if: needs.validate-for-publish.outputs.should-publish == 'true'
+        run: |
+          echo "🚀 Publishing to pub.dev..."
+          flutter pub publish --force
+          echo "🎉 Successfully published to pub.dev!"
+
+      - name: 📝 Create publication summary
+        if: always()
+        run: |
+          VERSION="${{ needs.validate-for-publish.outputs.version }}"
+          PACKAGE_NAME=$(grep "name:" pubspec.yaml | cut -d' ' -f2)
+          
+          echo "## 📦 Publication Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Package**: $PACKAGE_NAME" >> $GITHUB_STEP_SUMMARY
+          echo "- **Version**: $VERSION" >> $GITHUB_STEP_SUMMARY
+          echo "- **Status**: $([[ "${{ needs.validate-for-publish.outputs.should-publish }}" == "true" ]] && echo "✅ Published" || echo "🔍 Dry Run")" >> $GITHUB_STEP_SUMMARY
+          echo "- **pub.dev URL**: https://pub.dev/packages/$PACKAGE_NAME" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          if [[ "${{ needs.validate-for-publish.outputs.should-publish }}" == "true" ]]; then
+            echo "🎉 Your package has been successfully published to pub.dev!" >> $GITHUB_STEP_SUMMARY
+            echo "It may take a few minutes to appear in search results." >> $GITHUB_STEP_SUMMARY
+          else
+            echo "✅ Dry run completed successfully. Your package is ready for publishing!" >> $GITHUB_STEP_SUMMARY
+          fi
+
+  # Post-publish verification
+  verify-publication:
+    name: ✅ Verify Publication
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: [validate-for-publish, publish]
+    if: needs.validate-for-publish.outputs.should-publish == 'true'
+    
+    steps:
+      - name: 📚 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: ⏳ Wait for pub.dev propagation
+        run: |
+          echo "Waiting for pub.dev to propagate the new version..."
+          sleep 60
+
+      - name: 🔍 Verify package on pub.dev
+        run: |
+          PACKAGE_NAME=$(grep "name:" pubspec.yaml | cut -d' ' -f2)
+          VERSION="${{ needs.validate-for-publish.outputs.version }}"
+          
+          echo "Verifying package $PACKAGE_NAME version $VERSION on pub.dev..."
+          
+          # Check if the package version is available
+          for i in {1..5}; do
+            if curl -s "https://pub.dev/api/packages/$PACKAGE_NAME/versions/$VERSION" | grep -q "version"; then
+              echo "✅ Package version $VERSION is live on pub.dev!"
+              break
+            else
+              echo "⏳ Waiting for version to appear on pub.dev (attempt $i/5)..."
+              sleep 30
+            fi
+          done
+          
+          # Final verification
+          if curl -s "https://pub.dev/api/packages/$PACKAGE_NAME/versions/$VERSION" | grep -q "version"; then
+            echo "🎉 Successfully verified package on pub.dev!"
+          else
+            echo "⚠️  Package may still be propagating. Check manually at https://pub.dev/packages/$PACKAGE_NAME"
+          fi
+
+      - name: 📝 Create verification summary
+        run: |
+          PACKAGE_NAME=$(grep "name:" pubspec.yaml | cut -d' ' -f2)
+          VERSION="${{ needs.validate-for-publish.outputs.version }}"
+          
+          echo "## ✅ Publication Verification" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Package**: [$PACKAGE_NAME](https://pub.dev/packages/$PACKAGE_NAME)" >> $GITHUB_STEP_SUMMARY
+          echo "- **Version**: $VERSION" >> $GITHUB_STEP_SUMMARY
+          echo "- **Status**: 🎉 Live on pub.dev" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Next Steps:" >> $GITHUB_STEP_SUMMARY
+          echo "1. Update your project's README with the new version" >> $GITHUB_STEP_SUMMARY
+          echo "2. Consider creating a GitHub release with changelog" >> $GITHUB_STEP_SUMMARY
+          echo "3. Update any example projects or documentation" >> $GITHUB_STEP_SUMMARY
+
+  # Notify on failure
+  notify-failure:
+    name: 📢 Notify on Failure
+    runs-on: ubuntu-latest
+    needs: [validate-for-publish, test-before-publish, publish]
+    if: failure()
+    
+    steps:
+      - name: 📢 Create failure summary
+        run: |
+          echo "## ❌ Publication Failed" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "The publication process failed. Please check the logs for details." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Common Issues:" >> $GITHUB_STEP_SUMMARY
+          echo "- Version already exists on pub.dev" >> $GITHUB_STEP_SUMMARY
+          echo "- Package validation failed" >> $GITHUB_STEP_SUMMARY
+          echo "- Test suite failed" >> $GITHUB_STEP_SUMMARY
+          echo "- Invalid pub.dev credentials" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Next Steps:" >> $GITHUB_STEP_SUMMARY
+          echo "1. Review the failed job logs" >> $GITHUB_STEP_SUMMARY
+          echo "2. Fix any issues identified" >> $GITHUB_STEP_SUMMARY
+          echo "3. Update the version number if needed" >> $GITHUB_STEP_SUMMARY
+          echo "4. Re-run the workflow"
