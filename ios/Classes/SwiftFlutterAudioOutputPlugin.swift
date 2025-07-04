@@ -3,6 +3,8 @@ import UIKit
 import AVFoundation
 
 public class SwiftFlutterAudioOutputPlugin: NSObject, FlutterPlugin {
+  var channel: FlutterMethodChannel?
+  
   public static func register(with registrar: FlutterPluginRegistrar) {
     let channel = FlutterMethodChannel(name: "flutter_audio_output", binaryMessenger: registrar.messenger())
     let instance = SwiftFlutterAudioOutputPlugin()
@@ -24,12 +26,17 @@ public class SwiftFlutterAudioOutputPlugin: NSObject, FlutterPlugin {
             result(changeToReceiver())
         }
         else if(call.method == "changeToHeadphones"){
-            result(changeToBluetooth())
+            result(changeToHeadphones())
         }
         else if(call.method == "changeToBluetooth"){
             result(changeToBluetooth())
         }
-        result("iOS " + UIDevice.current.systemVersion)
+        else if(call.method == "getPlatformVersion"){
+            result("iOS " + UIDevice.current.systemVersion)
+        }
+        else {
+            result(FlutterMethodNotImplemented)
+        }
   }
   func getCurrentOutput() -> [String]  {
         let currentRoute = AVAudioSession.sharedInstance().currentRoute
@@ -75,12 +82,23 @@ public class SwiftFlutterAudioOutputPlugin: NSObject, FlutterPlugin {
     }
 
     func changeToSpeaker() -> Bool{
-        try? AVAudioSession.sharedInstance().overrideOutputAudioPort(AVAudioSession.PortOverride.speaker)
-        return true;
+        do {
+            try AVAudioSession.sharedInstance().overrideOutputAudioPort(AVAudioSession.PortOverride.speaker)
+            return true
+        } catch {
+            print("Error changing to speaker: \(error)")
+            return false
+        }
     }
     
     func changeToReceiver() -> Bool{
-        return changeByPortType([AVAudioSession.Port.builtInMic])
+        do {
+            try AVAudioSession.sharedInstance().overrideOutputAudioPort(AVAudioSession.PortOverride.none)
+            return true
+        } catch {
+            print("Error changing to receiver: \(error)")
+            return false
+        }
     }
     
     func changeToHeadphones() -> Bool{
@@ -112,7 +130,18 @@ public class SwiftFlutterAudioOutputPlugin: NSObject, FlutterPlugin {
 
     public override init() {
         super.init()
+        setupAudioSession()
         registerAudioRouteChangeBlock()
+    }
+    
+    func setupAudioSession() {
+        do {
+            let audioSession = AVAudioSession.sharedInstance()
+            try audioSession.setCategory(.playAndRecord, mode: .default, options: [.allowBluetooth, .allowBluetoothA2DP])
+            try audioSession.setActive(true)
+        } catch {
+            print("Error setting up audio session: \(error)")
+        }
     }
     
     func registerAudioRouteChangeBlock(){
