@@ -1,3 +1,16 @@
+## 0.0.4
+
+### 🐛 Bug Fixes
+- **Integration Tests**: Fixed `getAvailableOutputs()` method call to use correct `getAvailableInputs()` method
+- **Example App**: Updated widget tests to match modernized UI
+- **Android**: Fixed Gradle configuration for modern Flutter versions
+- **Code Quality**: Improved integration test reliability and error handling
+
+### 🔧 Improvements
+- **Tests**: Enhanced integration test coverage and stability
+- **Documentation**: Updated API documentation for clarity
+- **CI/CD**: Refined automated testing and publishing workflows
+
 ## 0.0.3
 
 ### 🔥 Breaking Changes
