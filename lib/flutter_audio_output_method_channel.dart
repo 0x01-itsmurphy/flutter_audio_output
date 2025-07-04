@@ -11,7 +11,15 @@ class MethodChannelFlutterAudioOutput extends FlutterAudioOutputPlatform {
 
   @override
   Future<String?> getPlatformVersion() async {
-    final version = await methodChannel.invokeMethod<String>('getPlatformVersion');
-    return version;
+    try {
+      final version =
+          await methodChannel.invokeMethod<String>('getPlatformVersion');
+      return version;
+    } on PlatformException catch (e) {
+      if (kDebugMode) {
+        print('Error getting platform version: ${e.message}');
+      }
+      return null;
+    }
   }
 }

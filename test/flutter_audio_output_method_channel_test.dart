@@ -10,7 +10,12 @@ void main() {
 
   setUp(() {
     channel.setMockMethodCallHandler((MethodCall methodCall) async {
-      return '42';
+      switch (methodCall.method) {
+        case 'getPlatformVersion':
+          return '42';
+        default:
+          return null;
+      }
     });
   });
 
@@ -20,5 +25,16 @@ void main() {
 
   test('getPlatformVersion', () async {
     expect(await platform.getPlatformVersion(), '42');
+  });
+
+  test('getPlatformVersion with error', () async {
+    channel.setMockMethodCallHandler((MethodCall methodCall) async {
+      throw PlatformException(
+        code: 'ERROR',
+        message: 'Test error',
+      );
+    });
+
+    expect(await platform.getPlatformVersion(), isNull);
   });
 }
