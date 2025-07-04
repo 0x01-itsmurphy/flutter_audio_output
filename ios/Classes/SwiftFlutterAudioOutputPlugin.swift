@@ -9,7 +9,7 @@ public class SwiftFlutterAudioOutputPlugin: NSObject, FlutterPlugin {
     let channel = FlutterMethodChannel(name: "flutter_audio_output", binaryMessenger: registrar.messenger())
     let instance = SwiftFlutterAudioOutputPlugin()
     registrar.addMethodCallDelegate(instance, channel: channel)
-    instance.channel = channel;
+    instance.channel = channel
   }
 
   public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
@@ -145,14 +145,15 @@ public class SwiftFlutterAudioOutputPlugin: NSObject, FlutterPlugin {
     }
     
     func registerAudioRouteChangeBlock(){
-        NotificationCenter.default.addObserver( forName:AVAudioSession.routeChangeNotification, object: AVAudioSession.sharedInstance(), queue: nil) { notification in
-            guard let userInfo = notification.userInfo,
-                let reasonValue = userInfo[AVAudioSessionRouteChangeReasonKey] as? UInt,
-                let reason = AVAudioSession.RouteChangeReason(rawValue:reasonValue) else {
+        NotificationCenter.default.addObserver( forName:AVAudioSession.routeChangeNotification, object: AVAudioSession.sharedInstance(), queue: nil) { [weak self] notification in
+            guard let self = self,
+                  let userInfo = notification.userInfo,
+                  let reasonValue = userInfo[AVAudioSessionRouteChangeReasonKey] as? UInt,
+                  let reason = AVAudioSession.RouteChangeReason(rawValue:reasonValue) else {
                     return
             }
-            print("registerAudioRouteChangeBlock \(reason)");
-            self.channel!.invokeMethod("inputChanged",arguments: 1)
+            print("registerAudioRouteChangeBlock \(reason)")
+            self.channel?.invokeMethod("inputChanged", arguments: 1)
         }
     }
 }
