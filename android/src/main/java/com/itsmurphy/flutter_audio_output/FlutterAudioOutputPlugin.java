@@ -20,6 +20,7 @@ import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
 import io.flutter.plugin.common.MethodChannel.Result;
 
 /** FlutterAudioOutputPlugin */
+@SuppressWarnings("deprecation")
 public class FlutterAudioOutputPlugin implements FlutterPlugin, MethodCallHandler {
   private static final String TAG = "FlutterAudioOutput";
   
