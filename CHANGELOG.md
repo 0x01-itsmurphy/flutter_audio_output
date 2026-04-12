@@ -1,4 +1,4 @@
-## 1.0.5
+## 1.0.6
 
 ### 🚀 New Features & Enhancements
 - **Environment**: Upgraded platform constraints fully supporting Dart 3 (`sdk: ">=3.0.0 <4.0.0"`) and Flutter `>=3.3.0`.

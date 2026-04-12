@@ -29,7 +29,7 @@ Add this to your package's `pubspec.yaml` file:
 
 ```yaml
 dependencies:
-  flutter_audio_output: ^1.0.5
+  flutter_audio_output: ^1.0.6
 ```
 
 ## Usage
@@ -332,7 +332,7 @@ try {
 - Automatically configures audio session for optimal performance
 - Handles audio route changes and notifications
 
-## Migration to 1.0.5
+## Migration to 1.0.6
 
 ### Breaking Changes
 - Minimum Flutter version increased to 3.3.0
