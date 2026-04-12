@@ -83,7 +83,10 @@ public class SwiftFlutterAudioOutputPlugin: NSObject, FlutterPlugin {
 
     func changeToSpeaker() -> Bool{
         do {
-            try AVAudioSession.sharedInstance().overrideOutputAudioPort(AVAudioSession.PortOverride.speaker)
+            let session = AVAudioSession.sharedInstance()
+            try session.setCategory(.playAndRecord, mode: .default, options: [.allowBluetooth, .allowBluetoothA2DP, .defaultToSpeaker])
+            try session.overrideOutputAudioPort(AVAudioSession.PortOverride.speaker)
+            try session.setActive(true)
             return true
         } catch {
             print("Error changing to speaker: \(error)")
@@ -93,7 +96,10 @@ public class SwiftFlutterAudioOutputPlugin: NSObject, FlutterPlugin {
     
     func changeToReceiver() -> Bool{
         do {
-            try AVAudioSession.sharedInstance().overrideOutputAudioPort(AVAudioSession.PortOverride.none)
+            let session = AVAudioSession.sharedInstance()
+            try session.setCategory(.playAndRecord, mode: .voiceChat, options: [.allowBluetooth, .allowBluetoothA2DP])
+            try session.overrideOutputAudioPort(AVAudioSession.PortOverride.none)
+            try session.setActive(true)
             return true
         } catch {
             print("Error changing to receiver: \(error)")
