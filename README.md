@@ -19,9 +19,9 @@ A Flutter plugin for managing audio output routing, providing seamless control o
 ## Supported Platforms
 
 - **Android**: API 21+ (Android 5.0+)
-- **iOS**: 12.0+
-- **Flutter**: 3.0+
-- **Dart**: 2.19+
+- **iOS**: 13.0+
+- **Flutter**: 3.3.0+
+- **Dart**: 3.0.0+
 
 ## Installation
 
@@ -29,7 +29,7 @@ Add this to your package's `pubspec.yaml` file:
 
 ```yaml
 dependencies:
-  flutter_audio_output: ^0.0.3
+  flutter_audio_output: ^1.0.5
 ```
 
 ## Usage
@@ -332,13 +332,13 @@ try {
 - Automatically configures audio session for optimal performance
 - Handles audio route changes and notifications
 
-## Migration from 0.0.2
+## Migration to 1.0.5
 
 ### Breaking Changes
-- Minimum Flutter version increased to 3.0.0
-- Minimum Dart version increased to 2.19.0
-- Android minimum SDK increased to 21
-- iOS minimum version increased to 12.0
+- Minimum Flutter version increased to 3.3.0
+- Minimum Dart version increased to 3.0.0
+- Android minimum SDK increased to 21 (with AGP 8.6.0 requirements)
+- iOS minimum version increased to 13.0
 
 ### New Features
 - Added `removeListener()` method
