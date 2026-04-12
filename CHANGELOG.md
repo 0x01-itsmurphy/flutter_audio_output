@@ -1,6 +1,17 @@
-## 0.0.4
+## 1.0.5
 
-### 🐛 Bug Fixes
+### 🚀 New Features & Enhancements
+- **Environment**: Upgraded platform constraints fully supporting Dart 3 (`sdk: ">=3.0.0 <4.0.0"`) and Flutter `>=3.3.0`.
+- **iOS**: Explicitly re-asserts `AVAudioSession` `playAndRecord` coupled with `voiceChat` mode when changing output devices, permanently solving iOS receiver failures when media players force `playback` mode.
+- **iOS**: Elevated iOS integration target permanently to 13.0 mimicking standard native app defaults.
+
+### 🐛 Bug Fixes & Stability
+- **Android**: Closed modern Gradle compatibility crashes by officially embedding required namespaces natively bridging Android Studio Flamingo+ features and enforcing SDK 36 validation.
+- **Android**: Updated Internal Gradle Plugin safely to `8.6.0` paired with Kotlin `2.1.0`.
+- **Android**: Suppressed implicit legacy API build warnings for backwards-compatible hardware routines ensuring 100% spotless compilation cycles.
+- **All**: Reconstructed legacy evaluation app with fully native 2026-standard architecture and dropped outdated platform bindings.
+
+## 0.0.4### 🐛 Bug Fixes
 - **Integration Tests**: Fixed `getAvailableOutputs()` method call to use correct `getAvailableInputs()` method
 - **Example App**: Updated widget tests to match modernized UI
 - **Android**: Fixed Gradle configuration for modern Flutter versions
