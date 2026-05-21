@@ -20,8 +20,7 @@ void main() {
   });
 
   test('getPlatformVersion', () async {
-    MockFlutterAudioOutputPlatform fakePlatform =
-        MockFlutterAudioOutputPlatform();
+    final fakePlatform = MockFlutterAudioOutputPlatform();
     FlutterAudioOutputPlatform.instance = fakePlatform;
 
     expect(await FlutterAudioOutput.getPlatformVersion(), '42');

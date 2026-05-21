@@ -51,7 +51,7 @@ jobs:
       - name: 📊 Check package score
         run: |
           dart pub global activate pana
-          pana --no-warning --exit-code-threshold 0
+          dart pub global run pana --no-warning --exit-code-threshold 0
 
       - name: 🏷️ Extract and validate version
         id: version

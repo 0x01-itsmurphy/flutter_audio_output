@@ -383,7 +383,7 @@ class _AudioOutputExampleState extends State<AudioOutputExample> {
 
                           return Card(
                             color: isCurrentDevice
-                                ? _getColorForPort(device.port).withOpacity(0.1)
+                                ? _getColorForPort(device.port).withAlpha(26)
                                 : null,
                             child: ListTile(
                               leading: Icon(
@@ -439,7 +439,7 @@ class _AudioOutputExampleState extends State<AudioOutputExample> {
                         icon: const Icon(Icons.phone),
                         label: const Text('Receiver'),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blue.withOpacity(0.1),
+                          backgroundColor: Colors.blue.withAlpha(26),
                           foregroundColor: Colors.blue,
                         ),
                       ),
@@ -453,7 +453,7 @@ class _AudioOutputExampleState extends State<AudioOutputExample> {
                         icon: const Icon(Icons.volume_up),
                         label: const Text('Speaker'),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.orange.withOpacity(0.1),
+                          backgroundColor: Colors.orange.withAlpha(26),
                           foregroundColor: Colors.orange,
                         ),
                       ),

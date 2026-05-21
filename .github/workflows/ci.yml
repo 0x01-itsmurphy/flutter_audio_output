@@ -6,6 +6,7 @@ on:
   pull_request:
     branches: [ main ]
   workflow_dispatch:
+  workflow_call:
 
 env:
   FLUTTER_VERSION: '3.19.0'
@@ -229,7 +230,7 @@ jobs:
         run: |
           flutter pub publish --dry-run
           dart pub global activate pana
-          pana --no-warning
+          dart pub global run pana --no-warning
 
       - name: 📊 Check package score
         run: |

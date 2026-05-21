@@ -3,13 +3,14 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_audio_output/flutter_audio_output_method_channel.dart';
 
 void main() {
-  MethodChannelFlutterAudioOutput platform = MethodChannelFlutterAudioOutput();
+  final platform = MethodChannelFlutterAudioOutput();
   const MethodChannel channel = MethodChannel('flutter_audio_output');
 
   TestWidgetsFlutterBinding.ensureInitialized();
 
   setUp(() {
-    channel.setMockMethodCallHandler((MethodCall methodCall) async {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
       switch (methodCall.method) {
         case 'getPlatformVersion':
           return '42';
@@ -20,7 +21,8 @@ void main() {
   });
 
   tearDown(() {
-    channel.setMockMethodCallHandler(null);
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(channel, null);
   });
 
   test('getPlatformVersion', () async {
@@ -28,7 +30,8 @@ void main() {
   });
 
   test('getPlatformVersion with error', () async {
-    channel.setMockMethodCallHandler((MethodCall methodCall) async {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
       throw PlatformException(
         code: 'ERROR',
         message: 'Test error',
