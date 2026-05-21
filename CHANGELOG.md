@@ -1,3 +1,16 @@
+## 1.0.7
+
+### 🔧 CI/CD & Infrastructure
+- **Reusable Workflows**: Added `workflow_call:` trigger to `ci.yml` allowing reusable workflow execution within `publish.yml`.
+- **Global Executables**: Standardized execution of `pana` in GitHub Actions via `dart pub global run pana` to resolve runner tool resolution issues.
+
+### 🧪 Testing & Reliability
+- **Integration Tests**: Added the missing integration test suite (`example/integration_test/app_test.dart` and `example/test_driver/integration_test.dart`) required by the CI workflows.
+- **Example Tests**: Modernized example application unit tests using mocked method channels (`getPlatformVersion`, `getCurrentOutput`, and `getAvailableInputs`) to isolate platform calls during widget testing.
+
+### 🧹 Code Quality & Compatibility
+- **Lints & Deprecations**: Fixed modern Flutter SDK lints by replacing deprecated `withOpacity(0.1)` color modifiers with `withAlpha(26)`.
+
 ## 1.0.6
 
 ### 🚀 New Features & Enhancements

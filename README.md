@@ -29,7 +29,7 @@ Add this to your package's `pubspec.yaml` file:
 
 ```yaml
 dependencies:
-  flutter_audio_output: ^1.0.6
+  flutter_audio_output: ^1.0.7
 ```
 
 ## Usage

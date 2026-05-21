@@ -4,6 +4,21 @@
 
 This document outlines all the comprehensive updates made to the Flutter Audio Output plugin to modernize it for current Flutter and Android/iOS development standards.
 
+## 🚀 Version 1.0.7 Release Updates
+
+In version `1.0.7`, we resolved a series of CI/CD integration blockers and modernized example tests for pub.dev publication:
+
+- **CI/CD Pipeline Fixed**:
+  - Corrected `pana` runner paths in `.github/workflows/ci.yml` and `publish.yml` to standard globally-activated execution (`dart pub global run pana`).
+  - Added the `workflow_call:` trigger to `ci.yml` allowing reusable triggers.
+- **Example App Integration Test Suite**:
+  - Added missing integration tests under `example/integration_test/app_test.dart` and the test driver `example/test_driver/integration_test.dart`.
+  - Added `integration_test` to `example/pubspec.yaml` `dev_dependencies`.
+- **Unit Test Cleanup**:
+  - Mocked missing platform method channels (`getPlatformVersion`, `getCurrentOutput`, `getAvailableInputs`) in the example widget test to isolate the application UI and ensure a clean test run.
+- **Modern SDK Lints**:
+  - Resolved `withOpacity` deprecation warnings on newer Flutter SDK channels by using `withAlpha`.
+
 ## 🎯 Key Improvements
 
 ### 1. **Gradle 8.8 Compatibility**
