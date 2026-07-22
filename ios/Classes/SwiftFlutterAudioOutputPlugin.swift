@@ -31,6 +31,10 @@ public class SwiftFlutterAudioOutputPlugin: NSObject, FlutterPlugin {
         else if(call.method == "changeToBluetooth"){
             result(changeToBluetooth())
         }
+        else if(call.method == "release"){
+            // Avoid changing the shared AVAudioSession; release has no iOS side effects.
+            result(nil)
+        }
         else if(call.method == "getPlatformVersion"){
             result("iOS " + UIDevice.current.systemVersion)
         }

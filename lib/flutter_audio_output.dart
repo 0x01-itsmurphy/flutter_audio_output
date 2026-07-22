@@ -137,6 +137,20 @@ class FlutterAudioOutput {
     }
   }
 
+  /// Releases audio-routing changes made through this plugin.
+  ///
+  /// On Android this cancels an in-flight route change, clears the selected
+  /// communication device (or legacy speakerphone/Bluetooth SCO state), and
+  /// resets any audio mode applied by the plugin. This method has no effect on
+  /// iOS.
+  static Future<void> release() async {
+    try {
+      await _channel.invokeMethod<void>('release');
+    } on PlatformException catch (e) {
+      throw Exception('Failed to release audio routing: ${e.message}');
+    }
+  }
+
   /// Sets a listener for audio input changes
   static void setListener(void Function() onInputChanged) {
     _onInputChanged = onInputChanged;
