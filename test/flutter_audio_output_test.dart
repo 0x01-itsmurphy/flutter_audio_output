@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_audio_output/flutter_audio_output.dart';
 import 'package:flutter_audio_output/flutter_audio_output_platform_interface.dart';
@@ -12,8 +13,17 @@ class MockFlutterAudioOutputPlatform
 }
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
   final FlutterAudioOutputPlatform initialPlatform =
       FlutterAudioOutputPlatform.instance;
+  const channel = MethodChannel('flutter_audio_output');
+
+  tearDown(() {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(channel, null);
+    FlutterAudioOutputPlatform.instance = initialPlatform;
+  });
 
   test('$MethodChannelFlutterAudioOutput is the default instance', () {
     expect(initialPlatform, isInstanceOf<MethodChannelFlutterAudioOutput>());
@@ -44,5 +54,33 @@ void main() {
     const input = AudioInput('Speaker', 2);
     expect(
         input.toString(), 'AudioInput(name: Speaker, port: AudioPort.speaker)');
+  });
+
+  test('release completes through the method channel', () async {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(channel, (MethodCall call) async {
+      expect(call.method, 'release');
+      return null;
+    });
+
+    await expectLater(FlutterAudioOutput.release(), completes);
+  });
+
+  test('release wraps platform errors', () async {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(channel, (MethodCall call) async {
+      throw PlatformException(code: 'release_failed', message: 'boom');
+    });
+
+    await expectLater(
+      FlutterAudioOutput.release(),
+      throwsA(
+        isA<Exception>().having(
+          (error) => error.toString(),
+          'message',
+          contains('Failed to release audio routing: boom'),
+        ),
+      ),
+    );
   });
 }

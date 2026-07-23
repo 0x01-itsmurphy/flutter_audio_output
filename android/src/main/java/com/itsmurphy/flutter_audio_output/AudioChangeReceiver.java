@@ -3,16 +3,16 @@ package com.itsmurphy.flutter_audio_output;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.util.Log;
-import android.view.KeyEvent;
+import android.media.AudioManager;
 
 interface AudioEventListener {
     void onChanged();
 }
 
+/** Receives wired-headset changes below API 23, where AudioDeviceCallback is unavailable. */
 public class AudioChangeReceiver extends BroadcastReceiver {
 
-    AudioEventListener audioEventListener;
+    private final AudioEventListener audioEventListener;
 
     public AudioChangeReceiver(final AudioEventListener listener) {
         this.audioEventListener = listener;
@@ -20,14 +20,8 @@ public class AudioChangeReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(final Context context, final Intent intent) {
-        if (intent.getAction().equals(Intent.ACTION_HEADSET_PLUG)) {
-//            final int state = intent.getIntExtra("state", -1);
+        if (AudioManager.ACTION_HEADSET_PLUG.equals(intent.getAction())) {
             audioEventListener.onChanged();
         }
-//        else if(BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED.equals(intent.getAction())){
-//            audioEventListener.onChanged();
-//        }else if(BluetoothAdapter.ACTION_STATE_CHANGED.equals(intent.getAction())){
-//            audioEventListener.onChanged();
-//        }
     }
 }
