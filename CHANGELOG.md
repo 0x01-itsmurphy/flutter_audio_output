@@ -1,3 +1,11 @@
+## 1.1.0
+
+### Android
+- Use communication-device routing APIs on Android 12 and newer, while retaining legacy fallbacks.
+- Complete route-change futures after the requested device is confirmed, rejected, or times out.
+- Add `release()` to cancel pending changes and clear routing state set through the plugin.
+- Add native routing lifecycle and compatibility tests.
+
 ## 1.0.7
 
 ### 🔧 CI/CD & Infrastructure

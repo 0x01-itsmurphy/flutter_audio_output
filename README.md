@@ -29,7 +29,7 @@ Add this to your package's `pubspec.yaml` file:
 
 ```yaml
 dependencies:
-  flutter_audio_output: ^1.0.7
+  flutter_audio_output: ^1.1.0
 ```
 
 ## Usage
@@ -54,7 +54,16 @@ final success = await FlutterAudioOutput.changeToSpeaker();
 if (success) {
   print('Successfully switched to speaker');
 }
+
+// Release routing when it is no longer needed.
+await FlutterAudioOutput.release();
 ```
+
+On Android 12 and newer, route-change futures complete after Android confirms
+the selected communication device, or return `false` if the device is
+unavailable or the request times out. On older Android versions, receiver,
+speaker, and wired-headset routing remains synchronous; Bluetooth completes
+after the SCO connection succeeds or fails.
 
 ### Listen to Audio Device Changes
 
@@ -259,6 +268,14 @@ Switches audio output to Bluetooth audio device (if connected).
 
 ```dart
 Future<bool> changeToBluetooth()
+```
+
+#### `release()`
+Cancels pending route changes and clears routing state set through the plugin.
+This method is currently a no-op on iOS.
+
+```dart
+Future<void> release()
 ```
 
 #### `setListener()`
