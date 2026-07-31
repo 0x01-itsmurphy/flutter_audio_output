@@ -127,6 +127,9 @@ public class SwiftFlutterAudioOutputPlugin: NSObject, FlutterPlugin {
                 return true;
             }
         }
+
+        // Configure the shared session only after an explicit route request.
+        setupAudioSession()
         if let inputs = AVAudioSession.sharedInstance().availableInputs {
             for input in inputs {
                 if(ports.firstIndex(of: input.portType) != nil){
@@ -140,7 +143,6 @@ public class SwiftFlutterAudioOutputPlugin: NSObject, FlutterPlugin {
 
     public override init() {
         super.init()
-        setupAudioSession()
         registerAudioRouteChangeBlock()
     }
     

@@ -346,7 +346,9 @@ try {
 ### iOS
 - Requires iOS 12.0 or higher
 - Uses `AVAudioSession` for audio routing
-- Automatically configures audio session for optimal performance
+- Leaves the shared audio session untouched at plugin registration and
+  configures it only when an output change is explicitly requested
+- Read-only queries reflect the audio-session category configured by the app
 - Handles audio route changes and notifications
 
 ## Migration to 1.0.6

@@ -6,6 +6,9 @@
 - Add `release()` to cancel pending changes and clear routing state set through the plugin.
 - Add native routing lifecycle and compatibility tests.
 
+### iOS
+- Defer `AVAudioSession` configuration and activation until an output change is explicitly requested, preventing plugin registration from interrupting existing audio.
+
 ## 1.0.7
 
 ### 🔧 CI/CD & Infrastructure
