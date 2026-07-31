@@ -1,3 +1,22 @@
+## 1.1.0
+
+### Dart
+- Add `FlutterAudioOutput.release()` to cancel pending Android route changes and clear routing state owned by the plugin. The method is a no-op on iOS.
+
+### Android
+- Use `setCommunicationDevice()` on Android 12 and newer, while retaining speakerphone and Bluetooth SCO fallbacks on Android 5 through 11.
+- Complete Android 12+ route-change futures after the platform confirms or rejects the requested device; legacy Bluetooth changes complete after SCO connects, fails, or times out.
+- Make routing lifecycle-safe: superseded and failed requests roll back partial changes, while `release()` and engine detachment clean up only the communication device, audio mode, speakerphone, and SCO state owned by this plugin.
+- Derive current and available routes from modern device APIs, including wired, USB, Bluetooth LE, and hearing-aid devices where Android exposes them.
+- Declare the `MODIFY_AUDIO_SETTINGS` permission required by Android routing APIs.
+
+### iOS
+- Defer `AVAudioSession` configuration and activation until an output change is explicitly requested, preventing plugin registration and read-only queries from interrupting existing audio.
+
+### Testing and tooling
+- Add native Android routing tests for API 21, legacy, and Android 12+ behavior and run them in CI.
+- Align CI and publishing workflows with Flutter 3.44.5.
+
 ## 1.0.7
 
 ### 🔧 CI/CD & Infrastructure

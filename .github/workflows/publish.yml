@@ -16,7 +16,7 @@ on:
         default: true
 
 env:
-  FLUTTER_VERSION: '3.19.0'
+  FLUTTER_VERSION: '3.44.5'
 
 jobs:
   # Pre-publish validation
